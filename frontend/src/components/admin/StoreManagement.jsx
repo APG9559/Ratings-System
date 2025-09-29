@@ -8,8 +8,14 @@ const StoreManagement = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  // Filter and sort states
-  const [filters, setFilters] = useState({
+  // Filter input state (typing)
+  const [filterInputs, setFilterInputs] = useState({
+    name: "",
+    email: "",
+    address: "",
+  })
+  // Applied filters (used for backend queries)
+  const [appliedFilters, setAppliedFilters] = useState({
     name: "",
     email: "",
     address: "",
@@ -19,20 +25,20 @@ const StoreManagement = () => {
 
   useEffect(() => {
     fetchStores()
-  }, [filters, sortBy, sortOrder])
+  }, [appliedFilters, sortBy, sortOrder])
 
   const fetchStores = async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
-        ...filters,
+        ...appliedFilters,
         sortBy,
         sortOrder,
       })
 
       // Remove empty filters
-      Object.keys(filters).forEach((key) => {
-        if (!filters[key]) {
+      Object.keys(appliedFilters).forEach((key) => {
+        if (!appliedFilters[key]) {
           params.delete(key)
         }
       })
@@ -49,10 +55,14 @@ const StoreManagement = () => {
   }
 
   const handleFilterChange = (field, value) => {
-    setFilters({
-      ...filters,
+    setFilterInputs({
+      ...filterInputs,
       [field]: value,
     })
+  }
+
+  const applyFilters = () => {
+    setAppliedFilters(filterInputs)
   }
 
   const handleSort = (field) => {
@@ -65,7 +75,12 @@ const StoreManagement = () => {
   }
 
   const clearFilters = () => {
-    setFilters({
+    setFilterInputs({
+      name: "",
+      email: "",
+      address: "",
+    })
+    setAppliedFilters({
       name: "",
       email: "",
       address: "",
@@ -127,7 +142,7 @@ const StoreManagement = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
             <input
               type="text"
-              value={filters.name}
+              value={filterInputs.name}
               onChange={(e) => handleFilterChange("name", e.target.value)}
               className="input-field"
               placeholder="Search by store name..."
@@ -137,7 +152,7 @@ const StoreManagement = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="text"
-              value={filters.email}
+              value={filterInputs.email}
               onChange={(e) => handleFilterChange("email", e.target.value)}
               className="input-field"
               placeholder="Search by email..."
@@ -147,16 +162,21 @@ const StoreManagement = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <input
               type="text"
-              value={filters.address}
+              value={filterInputs.address}
               onChange={(e) => handleFilterChange("address", e.target.value)}
               className="input-field"
               placeholder="Search by address..."
             />
           </div>
         </div>
-        <button onClick={clearFilters} className="btn-secondary">
+        <div className="flex items-center gap-3">
+          <button onClick={applyFilters} className="btn-primary">
+            Search
+          </button>
+          <button onClick={clearFilters} className="btn-secondary">
           Clear Filters
-        </button>
+          </button>
+        </div>
       </div>
 
       {/* Error Display */}

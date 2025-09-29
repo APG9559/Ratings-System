@@ -11,8 +11,15 @@ const UserManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null)
   const [showDetailsModal, setShowDetailsModal] = useState(false)
 
-  // Filter and sort states
-  const [filters, setFilters] = useState({
+  // Filter input state (typing)
+  const [filterInputs, setFilterInputs] = useState({
+    name: "",
+    email: "",
+    address: "",
+    role: "",
+  })
+  // Applied filters (used for backend queries)
+  const [appliedFilters, setAppliedFilters] = useState({
     name: "",
     email: "",
     address: "",
@@ -23,20 +30,20 @@ const UserManagement = () => {
 
   useEffect(() => {
     fetchUsers()
-  }, [filters, sortBy, sortOrder])
+  }, [appliedFilters, sortBy, sortOrder])
 
   const fetchUsers = async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
-        ...filters,
+        ...appliedFilters,
         sortBy,
         sortOrder,
       })
 
       // Remove empty filters
-      Object.keys(filters).forEach((key) => {
-        if (!filters[key]) {
+      Object.keys(appliedFilters).forEach((key) => {
+        if (!appliedFilters[key]) {
           params.delete(key)
         }
       })
@@ -53,10 +60,14 @@ const UserManagement = () => {
   }
 
   const handleFilterChange = (field, value) => {
-    setFilters({
-      ...filters,
+    setFilterInputs({
+      ...filterInputs,
       [field]: value,
     })
+  }
+
+  const applyFilters = () => {
+    setAppliedFilters(filterInputs)
   }
 
   const handleSort = (field) => {
@@ -69,7 +80,13 @@ const UserManagement = () => {
   }
 
   const clearFilters = () => {
-    setFilters({
+    setFilterInputs({
+      name: "",
+      email: "",
+      address: "",
+      role: "",
+    })
+    setAppliedFilters({
       name: "",
       email: "",
       address: "",
@@ -130,7 +147,7 @@ const UserManagement = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
             <input
               type="text"
-              value={filters.name}
+              value={filterInputs.name}
               onChange={(e) => handleFilterChange("name", e.target.value)}
               className="input-field"
               placeholder="Search by name..."
@@ -140,7 +157,7 @@ const UserManagement = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="text"
-              value={filters.email}
+              value={filterInputs.email}
               onChange={(e) => handleFilterChange("email", e.target.value)}
               className="input-field"
               placeholder="Search by email..."
@@ -150,7 +167,7 @@ const UserManagement = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <input
               type="text"
-              value={filters.address}
+              value={filterInputs.address}
               onChange={(e) => handleFilterChange("address", e.target.value)}
               className="input-field"
               placeholder="Search by address..."
@@ -159,7 +176,7 @@ const UserManagement = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
             <select
-              value={filters.role}
+              value={filterInputs.role}
               onChange={(e) => handleFilterChange("role", e.target.value)}
               className="input-field"
             >
@@ -170,9 +187,14 @@ const UserManagement = () => {
             </select>
           </div>
         </div>
-        <button onClick={clearFilters} className="btn-secondary">
-          Clear Filters
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={applyFilters} className="btn-primary">
+            Search
+          </button>
+          <button onClick={clearFilters} className="btn-secondary">
+            Clear Filters
+          </button>
+        </div>
       </div>
 
       {/* Error Display */}
