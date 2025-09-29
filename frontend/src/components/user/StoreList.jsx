@@ -9,8 +9,13 @@ const StoreList = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  // Search and sort states
-  const [searchFilters, setSearchFilters] = useState({
+  // Search input state (what the user is typing)
+  const [searchInputs, setSearchInputs] = useState({
+    name: "",
+    address: "",
+  })
+  // Applied filters (what is sent to the backend)
+  const [appliedFilters, setAppliedFilters] = useState({
     name: "",
     address: "",
   })
@@ -19,20 +24,20 @@ const StoreList = () => {
 
   useEffect(() => {
     fetchStores()
-  }, [searchFilters, sortBy, sortOrder])
+  }, [appliedFilters, sortBy, sortOrder])
 
   const fetchStores = async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
-        ...searchFilters,
+        ...appliedFilters,
         sortBy,
         sortOrder,
       })
 
       // Remove empty filters
-      Object.keys(searchFilters).forEach((key) => {
-        if (!searchFilters[key]) {
+      Object.keys(appliedFilters).forEach((key) => {
+        if (!appliedFilters[key]) {
           params.delete(key)
         }
       })
@@ -49,10 +54,14 @@ const StoreList = () => {
   }
 
   const handleSearchChange = (field, value) => {
-    setSearchFilters({
-      ...searchFilters,
+    setSearchInputs({
+      ...searchInputs,
       [field]: value,
     })
+  }
+
+  const applySearch = () => {
+    setAppliedFilters(searchInputs)
   }
 
   const handleSort = (field) => {
@@ -65,7 +74,11 @@ const StoreList = () => {
   }
 
   const clearSearch = () => {
-    setSearchFilters({
+    setSearchInputs({
+      name: "",
+      address: "",
+    })
+    setAppliedFilters({
       name: "",
       address: "",
     })
@@ -115,7 +128,7 @@ const StoreList = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
             <input
               type="text"
-              value={searchFilters.name}
+              value={searchInputs.name}
               onChange={(e) => handleSearchChange("name", e.target.value)}
               className="input-field"
               placeholder="Search by store name..."
@@ -125,7 +138,7 @@ const StoreList = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <input
               type="text"
-              value={searchFilters.address}
+              value={searchInputs.address}
               onChange={(e) => handleSearchChange("address", e.target.value)}
               className="input-field"
               placeholder="Search by address..."
@@ -134,6 +147,9 @@ const StoreList = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
+          <button onClick={applySearch} className="btn-primary text-sm">
+            Search
+          </button>
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium text-gray-700">Sort by:</span>
             <button
